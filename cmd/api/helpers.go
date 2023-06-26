@@ -19,6 +19,8 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
+type envelope map[string]any
+
 func (app *application) writeJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
 	// Encode the data to JSON, returning the error if there was one.
 	js, err := json.Marshal(data)
