@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kublick/goexpense/internal/data"
+	"github.com/kublick/goexpense/internal/validator"
 )
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +20,21 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	//Start validation
+	v := validator.New()
+
+	user := data.User{
+		Name:     input.Name,
+		LastName: input.LastName,
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	if data.ValidateUser(v, &user); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
