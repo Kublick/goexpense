@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -23,22 +22,31 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	//Start validation
-	v := validator.New()
-
-	user := data.User{
+	user := &data.User{
 		Name:     input.Name,
 		LastName: input.LastName,
 		Email:    input.Email,
 		Password: input.Password,
 	}
 
-	if data.ValidateUser(v, &user); !v.Valid() {
+	//Start validation
+	v := validator.New()
+
+	if data.ValidateUser(v, user); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
+	err = app.models.Users.Insert(user)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 
 }
 
