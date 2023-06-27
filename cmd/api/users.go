@@ -9,14 +9,28 @@ import (
 )
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "register a new user")
+	var input struct {
+		Name     string `json:"name"`
+		LastName string `json:"lastName"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
+
 }
 
 func (app *application) getUserById(w http.ResponseWriter, r *http.Request) {
 	// TODO might change to read a string insterad of number id
 	id, err := app.readIDParam(r)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 
@@ -31,7 +45,7 @@ func (app *application) getUserById(w http.ResponseWriter, r *http.Request) {
 	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
 	if err != nil {
 		app.logger.Println(err)
-		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 
 }
