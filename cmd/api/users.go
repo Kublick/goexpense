@@ -26,7 +26,12 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		Name:     input.Name,
 		LastName: input.LastName,
 		Email:    input.Email,
-		Password: input.Password,
+	}
+
+	err = user.Password.Set(input.Password)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
 	}
 
 	//Start validation
@@ -39,7 +44,13 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	err = app.models.Users.Insert(user)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrDuplicateEmail):
+			v.AddError("email", "a user with this email address already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
@@ -111,8 +122,6 @@ func (app *application) updateUserHandler(w http.ResponseWriter, r *http.Request
 
 	user.Name = input.Name
 	user.LastName = input.LastName
-
-	user.Password = input.Password
 
 	v := validator.New()
 
