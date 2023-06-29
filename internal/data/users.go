@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -26,6 +27,7 @@ type User struct {
 	Password  password  `json:"-"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+	Activated bool      `json:"activated"`
 }
 
 type password struct {
@@ -173,13 +175,13 @@ func (m UserModel) Get(id int64) (*User, error) {
 func (m UserModel) Update(user *User) error {
 	query := `
 	UPDATE users
-	SET name = $1, last_name = $2, password = $3, updated_at = $4
-	WHERE id = $6`
+	SET name = $1, last_name = $2, password_hash = $3, updated_at = $4
+	WHERE id = $5`
 
 	args := []interface{}{
 		user.Name,
 		user.LastName,
-		user.Password,
+		user.Password.hash,
 		time.Now(),
 		user.ID,
 	}
@@ -195,7 +197,6 @@ func (m UserModel) Update(user *User) error {
 		}
 	}
 	return nil
-
 }
 
 func (m UserModel) Delete(id int64) error {
@@ -220,6 +221,40 @@ func (m UserModel) Delete(id int64) error {
 		return ErrRecordNotFound
 	}
 	return nil
+}
+
+func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+	query := `
+	SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.last_name
+	FROM users
+	INNER JOIN tokens
+	ON users.id = tokens.user_id
+	WHERE tokens.hash = $1
+	AND tokens.scope = $2
+	AND tokens.expiry > $3`
+	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
+	var user User
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+		&user.LastName,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &user, nil
 }
 
 type MockUserModel struct{}

@@ -7,25 +7,17 @@ import (
 
 var (
 	ErrRecordNotFound = errors.New("record not found")
+	ErrEditConflict   = errors.New("edit conflict")
 )
 
 type Models struct {
-	Users interface {
-		Insert(user *User) error
-		Get(id int64) (*User, error)
-		Update(user *User) error
-		Delete(id int64) error
-	}
+	Users  UserModel
+	Tokens TokenModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Users: UserModel{DB: db},
-	}
-}
-
-func NewMockModels(db *sql.DB) Models {
-	return Models{
-		Users: MockUserModel{},
+		Users:  UserModel{DB: db},
+		Tokens: TokenModel{DB: db},
 	}
 }
