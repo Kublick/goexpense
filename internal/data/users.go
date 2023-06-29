@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -138,20 +139,24 @@ func (m UserModel) Get(id int64) (*User, error) {
 		return nil, ErrRecordNotFound
 	}
 	query := `
-	SELECT id, created_at, updated_at, name, email, last_name, password
+	SELECT  id, created_at, updated_at, name, email, last_name
 	FROM USERS
 	WHERE id = $1`
 
 	var user User
 
-	err := m.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&user.ID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.Name,
 		&user.Email,
 		&user.LastName,
-		&user.Password)
+	)
 
 	if err != nil {
 		switch {
