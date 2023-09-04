@@ -12,11 +12,11 @@ import (
 func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Request) {
 
 	var input struct {
-		Name           string  `json:"name"`
-		AccountType    string  `json:"type"`
-		InitialBalance float64 `json:"initialBalance"`
-		Budget         bool    `json:"budget"`
-		UserID         int64   `json:"userId"`
+		Name        string  `json:"name"`
+		AccountType string  `json:"type"`
+		Balance     float64 `json:"balance"`
+		Budget      bool    `json:"budget"`
+		UserID      int64   `json:"userId"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -26,14 +26,13 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	account := &data.Account{
-		Name:           input.Name,
-		AccountType:    input.AccountType,
-		InitialBalance: input.InitialBalance,
-		CurrentBalance: input.InitialBalance,
-		Budget:         input.Budget,
-		UserID:         input.UserID,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
+		Name:        input.Name,
+		AccountType: input.AccountType,
+		Balance:   input.Balance,
+		Budget:    input.Budget,
+		UserID:    input.UserID,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	v := validator.New()

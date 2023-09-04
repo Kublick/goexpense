@@ -6,8 +6,11 @@ CREATE TABLE accounts (
     created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
     updated_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
     budget BOOLEAN NOT NULL,
-    initial_balance DECIMAL(10, 2) NOT NULL,
-    current_balance DECIMAL(10, 2) NOT NULL,
+    balance DECIMAL(10, 2) NOT NULL,
+    cleared_balance DECIMAL(10, 2) NOT NULL,
+    uncleared_balance DECIMAL(10, 2) NOT NULL,
+    on_budget DECIMAL(10, 2) NOT NULL,
+    closed BOOLEAN NOT NULL DEFAULT FALSE, 
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
