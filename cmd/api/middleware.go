@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -213,11 +214,26 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 }
 
 func (app *application) getUser(w http.ResponseWriter, r *http.Request) {
-
+	// Retrieve the user from the request context.
 	user := app.contextGetUser(r)
-	err := app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
+
+	// Create a simplified user object with only the ID, name, and email fields.
+	simplifiedUser := struct {
+		ID    int    `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}{
+		ID:    int(user.ID),
+		Name:  user.Name,
+		Email: user.Email,
 	}
 
+	// Marshal the simplified user object to JSON and write it to the response body.
+	userJSON, err := json.Marshal(simplifiedUser)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(userJSON)
 }

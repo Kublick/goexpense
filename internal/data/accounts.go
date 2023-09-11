@@ -24,7 +24,7 @@ type AccountModel struct {
 
 func ValidateAccount(v *validator.Validator, account *Account) {
 	v.Check(account.Name != "", "name", "must be provided")
-	v.Check(account.AccountType != "", "accountType", "must be provided")
+	v.Check(account.AccountType != "account", "accountType", "must be provided")
 	v.Check(account.Balance != 0, "balance", "must be provided")
 	v.Check(account.UserID != 0, "userId", "must be provided")
 }
