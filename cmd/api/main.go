@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -50,11 +51,11 @@ type application struct {
 
 func main() {
 	var cfg config
-
+	fmt.Println("Starting!!!")
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	// flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://Kublick:zAyiYp2H0Kvr@ep-misty-lake-122413.us-west-2.aws.neon.tech/neondb", "PostgreSQL DSN")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:postgres@localhost/postgres?sslmode=disable", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://goexpense_user:goexpense@localhost/expense_db?sslmode=disable", "PostgreSQL DSN")
 
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")

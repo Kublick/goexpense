@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -24,15 +25,15 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
+	fmt.Println(input)
 	account := &data.Account{
 		Name:        input.Name,
 		AccountType: input.AccountType,
-		Balance:   input.Balance,
-		Budget:    input.Budget,
-		UserID:    input.UserID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Balance:     input.Balance,
+		Budget:      input.Budget,
+		UserID:      input.UserID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	v := validator.New()

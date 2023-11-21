@@ -31,8 +31,8 @@ func ValidateAccount(v *validator.Validator, account *Account) {
 
 func (m AccountModel) Insert(a *Account) error {
 	query := `
-	INSERT INTO accounts (name, initial_balance, current_balance, account_type, budget, user_id, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	INSERT INTO accounts (name, balance, account_type, budget, user_id, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	RETURNING id, created_at, updated_at`
 
 	args := []interface{}{a.Name, a.Balance, a.AccountType, a.Budget, a.UserID, a.CreatedAt, a.UpdatedAt}
@@ -42,7 +42,7 @@ func (m AccountModel) Insert(a *Account) error {
 
 func (m AccountModel) GetAll(userID int64) ([]*Account, error) {
 	query := `
-	SELECT id, name, initial_balance, current_balance, account_type, budget, user_id, created_at, updated_at
+	SELECT id, name, balance, account_type, budget, user_id, created_at, updated_at
 	FROM accounts
 	WHERE user_id = $1`
 
